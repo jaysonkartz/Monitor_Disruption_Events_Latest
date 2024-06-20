@@ -1,0 +1,316 @@
+/* Global Styles */
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Page Container */
+.container {
+  width: 90%;
+  padding-left: 50px;
+}
+
+/* Page Header */
+h1 {
+  text-align: center;
+}
+
+/* Top Section */
+.top-section {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* Left Panel */
+.left-panel {
+  width: 48%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Leaflet Map */
+#map {
+  height: 400px;
+}
+
+/* Custom Dropdown */
+.search-box {
+  width: 600px;
+  background: #fff;
+  margin: 10px auto 20px;
+  border-radius: 5px;
+  position: relative;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.input {
+  flex: 1;
+  height: 50px;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+button {
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+button .fa-solid {
+  width: 25px;
+  color: #555;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+::placeholder {
+  color: #555;
+}
+
+button#clear-search {
+  position: absolute;
+  right: 10px;
+  /* Adjust as needed */
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+}
+
+button#clear-search i {
+  color: #555;
+  font-size: 18px;
+}
+
+.city-result-box,
+.supplier-result-box {
+  max-height: 300px;
+  overflow-y:scroll;
+  display: none;
+  /* Hidden by default */
+  position: absolute;
+  width: calc(100% - 20px);
+  /* Adjust width to fit inside search box */
+  background: #fff;
+  z-index: 1000;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+}
+
+.city-result-box ul,
+.supplier-result-box ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.city-result-box ul li,
+.supplier-result-box ul li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+}
+
+.city-result-box ul li:hover,
+.supplier-result-box ul li:hover {
+  background-color: #f0f0f0;
+}
+
+.top-cities-list {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  position: absolute;
+  z-index: 5000;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-city-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+}
+
+.top-city-item:hover {
+  background-color: #f0f0f0;
+}
+
+.top-cities-label {
+  font-size: 12px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #ddd;
+}
+
+.top-city-item {
+  font-size: 13px;
+}
+
+/* Right Panel */
+.right-panel {
+  width: 48%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Controls */
+.controls {
+  margin: 100px;
+}
+
+/* Radio Buttons */
+input[type="radio"] {
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+/* Bottom Section */
+.bottom-section {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+/* Alerts Section */
+.bottom-section h2 {
+  text-align: center;
+}
+
+/* Select Dropdown */
+.bottom-section select {
+  padding: 10px;
+  width: 100%;
+  font-size: 16px;
+}
+
+/* Range Slider */
+#distance-slider {
+  width: 80%;
+  margin-left: 10px;
+}
+
+/* JavaScript Section */
+.bottom-section p {
+  font-size: 18px;
+  color: #333;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Leaflet Map */
+#map {
+  height: 500px;
+  width: 100%;
+}
+
+/* Calendar Section */
+#calendar-container {
+  display: none;
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  padding-left: 50px;
+  padding-bottom: 150px;
+}
+
+/* Show the calendar container when certain period radio button is checked */
+input[type="radio"][id="certain-period"]:checked~#calendar-container {
+  display: block;
+}
+
+/* Container for From and To date inputs */
+#date-input-container {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* Style for date inputs */
+.date-input {
+  width: 150px;
+  padding: 10px;
+  margin-top: 5px;
+}
+
+/* Calendar Style */
+#calendar {
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.1);
+  width: 15%;
+  background-color: transparent;
+  margin-bottom: 10px;
+}
+
+/* Responsive Design */
+@media only screen and (max-width:768px) {
+  .top-section {
+    flex-direction: column;
+  }
+
+  .left-panel,
+  .right-panel {
+    width: 100%;
+  }
+}
+
+/* Style for the article list */
+ul.article-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+ul.article-list li {
+  border: 1px solid #ccc;
+  margin: 10px 0;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+ul.article-list li:hover {
+  background-color: #f9f9f9;
+}
+
+/* Style for the article details section */
+.article-details {
+  padding: 20px;
+  background-color: #f9f9f9;
+  margin-top: 10px;
+  /* Add margin to separate from the article list */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.article-details p {
+  margin: 5px 0;
+}
+
+.top-right-text {
+  text-align: center;
+}
+
+.article-details #map {
+  width: 100%;
+  /* Make the map container responsive */
+  height: 300px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  /* Add margin to separate from other details */
+}

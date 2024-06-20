@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Monitor disruptions in various cities over the past 30 days."
+    />
+    <title>Real Time Disruption Monitoring</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script
+      src="https://kit.fontawesome.com/01d4187006.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Real Time Disruption Monitoring</h1>
+
+      <!-- Top Section -->
+      <div class="top-section">
+        <!-- Left Panel -->
+        <div class="left-panel">
+          <!-- Options -->
+          <div class="options">
+            <h2 id="selected-days-heading" style="text-align: center"></h2>
+
+            <!-- City Selection -->
+            <label for="input-box"
+              >Select a city to show on the map:</label
+            >
+            <div class="search-box">
+              <!-- City Search Input -->
+              <div class="row">
+                <input
+                  type="text"
+                  id="input-box"
+                  class="input"
+                  placeholder="Search City"
+                  autocomplete="off"
+                />
+                <div>
+                  <button
+                    id="city-search-btn"
+                    class="search"
+                    aria-label="Search"
+                  >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                  </button>
+                </div>
+                <div>
+                  <i id="clear-search" class="fa fa-times"></i>
+                </div>
+              </div>
+
+              <!-- City Results Container -->
+
+              <!-- Result Box -->
+              <div class="city-result-box">
+                <!-- Selected City -->
+                <div id="selected-city"></div>
+                <ul id="city-results"></ul>
+              </div>
+            </div>
+
+            <!-- Supplier Selection -->
+            <label for="supplier-input-box">Select a supplier:</label>
+            <div class="search-box">
+              <div class="row">
+                <input
+                  type="text"
+                  id="supplier-input-box"
+                  class="input"
+                  placeholder="Search Supplier"
+                  autocomplete="off"
+                />
+                <div>
+                  <button
+                    id="supplier-search-btn"
+                    class="search"
+                    aria-label="Search"
+                  >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                  </button>
+                </div>
+                <div>
+                  <i id="clear-supplier-search" class="fa fa-times"></i>
+                </div>
+              </div>
+              <div class="supplier-result-box">
+                <div id="selected-supplier"></div>
+                <ul id="supplier-results"></ul>
+              </div>
+            </div>
+
+            <!-- Leaflet Map -->
+            <div id="map"></div>
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+          <div class="controls">
+            <label>Choose an option for time period selection:</label>
+            <div>
+              <input type="radio" id="1-days" name="look-back" value="1" />
+              <label for="1-days">1 Day</label>
+            </div>
+            <div>
+              <input type="radio" id="7-days" name="look-back" value="7" />
+              <label for="7-days">7 Days</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                id="30-days"
+                name="look-back"
+                value="30"
+                checked
+              />
+              <label for="30-days">30 Days</label>
+            </div>
+            <div>
+              <input type="radio" id="60-days" name="look-back" value="60" />
+              <label for="60-days">60 Days</label>
+            </div>
+
+            <div>
+              <label for="certain-period">Select a certain period:</label>
+              <div class="radio-size">
+                <input
+                  type="radio"
+                  id="certain-period"
+                  name="look-back"
+                  value="certain"
+                />
+                <label for="certain-period">Custom Range</label>
+              </div>
+            </div>
+            <div id="calendar-container">
+              <!-- Container for From and To date inputs -->
+              <div id="date-input-container">
+                <label for="from-date">From:</label>
+                <input type="text" id="from-date" class="date-input" readonly />
+                <label for="to-date">To:</label>
+                <input type="text" id="to-date" class="date-input" readonly />
+              </div>
+            </div>
+
+            <!-- Filter by Cities -->
+            <div style="margin-top: 100px">
+              <label for="filter-by-cities">Filter by Cities:</label>
+              <select
+                id="filter-by-cities"
+                name="filter-by-cities"
+                style="width: 200px"
+              >
+                <option value="singapore">Singapore</option>
+              </select>
+            </div>
+
+            <!-- Filter by Disruptions -->
+            <div style="margin-top: 20px">
+              <label for="filter-by-disruptions">Filter by Disruptions:</label>
+              <select
+                id="filter-by-disruptions"
+                name="filter-by-disruptions"
+                style="width: 200px"
+              >
+                <option value="port-disruption">Port Disruption</option>
+              </select>
+            </div>
+
+            <!-- Filter by Distance -->
+            <div style="margin-top: 20px">
+              <label for="filter-by-distance"
+                >Average distance filter disruption events (KM):</label
+              >
+              <div style="display: flex; align-items: center">
+                <input
+                  type="range"
+                  id="distance-slider"
+                  name="distance-slider"
+                  min="0"
+                  max="1000"
+                  value="500"
+                />
+                <p id="distance-value" style="margin-left: 10px">500 KM</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Section -->
+      <div class="bottom-section">
+        <h2>🚨 Top Alerts: Disruption Events</h2>
+        <div>
+          <label for="number-of-display"
+            >Select the number of top disruptions to display:</label
+          >
+          <select
+            id="number-of-display"
+            name="number-of-display"
+            style="width: 100%"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <div class="articles-section" id="articles-section"></div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
