@@ -43,7 +43,7 @@ class SQLExtractor:
             logging.error("No connection to the database.")
             return None
 
-        query = "SELECT City,Lat, Lng FROM cities"
+        query = "SELECT City,Lat, Lng FROM cities_simplified_1000"
         try:
             with self.engine.connect() as connection:
                 city_data = pd.read_sql(query, connection)
@@ -164,6 +164,39 @@ class RequestHandler(BaseHTTPRequestHandler):
                 )
         else:
             self.respond({"error": "Invalid endpoint"}, status=404)
+
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length).decode('utf-8')
+
+        # Assuming post_data contains JSON payload with parameters
+        try:
+            payload = json.loads(post_data)
+
+            if self.path == "/python-code":
+                result = self.execute_python_code(payload)
+                self.respond({"result": result})
+            else:
+                self.respond({"error": "Invalid endpoint"}, status=404)
+
+        except json.JSONDecodeError as e:
+            logging.error(f"Error decoding JSON: {e}")
+            self.respond({"error": "Invalid JSON format"}, status=400)
+
+    def execute_python_code(self, payload):
+        # Example: Execute some custom Python logic based on the payload
+        try:
+            # Example: Printing the received payload
+            print("Received payload:", payload)
+
+            # Example: Perform some calculations or database operations
+            # Replace with your actual Python code logic
+
+            return "Python code executed successfully!"
+
+        except Exception as e:
+            logging.error(f"Error executing Python code: {e}")
+            return f"Error: {str(e)}"
 
     def respond(self, data, status=200):
         try:

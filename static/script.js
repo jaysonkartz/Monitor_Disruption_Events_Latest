@@ -1,14 +1,84 @@
 // Initialize the map
 var map = L.map("map").setView([1.3521, 103.8198], 12); // Default view for Singapore
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 }).addTo(map);
 
-// Global Variables
-let allCityData = [];
-let days = [];
-let allArticles = [];
-let allSupplierData = [];
+// Function to fetch articles
+async function fetchArticles() {
+    try {
+        const response = await fetch("http://localhost:8001/articles");
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        const responseData = await response.json(); // Assuming the response is JSON
+        console.log(responseData); // Check the response data in console
+        allArticles = responseData; // Store fetched articles (assuming responseData is an array of articles)
+
+        // Call function to add circles to map after fetching articles
+        addCirclesToMap();
+    } catch (error) {
+        console.error("There was a problem with the fetch operation:", error);
+    }
+}
+
+// Function to add circles to map
+function addCirclesToMap() {
+    // Loop through allArticles and add circles to the map
+    allArticles.forEach(article => {
+        if (article.lat && article.lng) {
+            addCircleToMap(map, article.lat, article.lng,article.Title);
+        }
+    });
+}
+
+function addCircleToMap(map, lat, lng, title) {
+    L.circle([lat, lng], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 3000
+    }).addTo(map).bindPopup(title); // Bind popup with title
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("DOM fully loaded and parsed"); // Check if DOMContentLoaded event fires
+	await fetchArticles(); // Wait for articles to be fetched before initializing the map
+	addCirclesToMap();
+});
+
+// Function to add circle to map
+// function addCircleToMap(map, lat, lng) {
+//     L.circle([lat, lng], {
+//         color: 'red',
+//         fillColor: '#f03',
+//         fillOpacity: 0.5,
+//         radius: 500
+//     }).addTo(map).bindPopup(title); // Bind popup with title
+// }
+
+// Function to fetch articles
+// async function fetchArticles() {
+//     console.log("Fetching articles..."); // Check if fetchArticles() is called
+//     try {
+//         const response = await fetch("http://localhost:8001/articles");
+//         if (!response.ok) {
+//             throw new Error("Network response was not ok");
+//         }
+//         const responseData = await response.json(); // Assuming the response is JSON
+//         allArticles = responseData; // Store fetched articles (assuming responseData is an array of articles)
+//         initMap(); // Initialize map after fetching articles
+//     } catch (error) {
+//         console.error("There was a problem with the fetch operation:", error);
+//     }
+// }
+
+
+function addMarkerToMap(lat, lng, title) {
+	L.marker([lat, lng]).addTo(map)
+		.bindPopup(title)
+		.openPopup();
+}
 
 //Search City
 
@@ -42,14 +112,21 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Input box event listeners
-    inputBox.addEventListener("input", function() {
-        const query = this.value;
-        if (query.length > 2) {
-            filterCities(query);
-        } else {
-            clearSearch();
-        }
-    });
+	// inputBox.addEventListener("input", function () {
+	// 	console.log(this.value)
+    //     const query = this.value;
+    //     if (query.length > 2) {
+    //         filterCities(query);
+    //     } else {
+    //         clearSearch();
+    //     }
+	// });
+	
+	document.getElementById("input-box").addEventListener("input", function() {
+	const query = this.value;
+		filterCities(query);
+
+});
 
     inputBox.addEventListener("focus", function() {
         if (this.value === '') {
@@ -79,7 +156,8 @@ async function fetchCityData() {
         if (!response.ok) throw new Error("Network response was not ok");
         const responseData = await response.text();
         const cityData = parseCityData(responseData);
-        allCityData = cityData; // Store all city data
+		allCityData = cityData; // Store all city data
+		console.log(allCityData)
     } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
     }
@@ -117,22 +195,56 @@ function filterCities(input) {
     document.querySelector(".city-result-box").style.display = filteredCities.length > 0 ? "block" : "none";
 }
 
-function addMarkerToMap(lat, lng, title) {
-    L.marker([lat, lng]).addTo(map)
-        .bindPopup(title)
-        .openPopup();
-}
+
 
 function selectCity(city) {
     if (map) {
-        map.setView([city.Lat, city.Lng], 12); // Set view to the selected city's coordinates
+        // Set map view to the selected city's coordinates
+        map.setView([city.Lat, city.Lng], 12);
+
+        // Add marker at the selected city's coordinates with city name as popup
         addMarkerToMap(city.Lat, city.Lng, city.City);
-        document.getElementById("input-box").value = city.City; 
+
+        // Update input box value with the selected city's name
+        document.getElementById("input-box").value = city.City;
+
+        // Hide the city result box
         document.querySelector(".city-result-box").style.display = "none";
+
+        // Update URL with selected city's lat and lng
+        const queryParams = new URLSearchParams(window.location.search);
+        queryParams.set('lat', city.Lat);
+        queryParams.set('lng', city.Lng);
+        
+        // Replace the current URL with the updated URL (without reloading)
+        history.replaceState(null, null, `${window.location.pathname}?${queryParams.toString()}`);
     } else {
         console.error('Map object is not initialized.');
     }
 }
+
+// Function to read lat and lng from URL and relocate map
+function relocateMapFromURL() {
+    // Get current URL search parameters
+    const queryParams = new URLSearchParams(window.location.search);
+    
+    // Read lat and lng values from URL
+    const lat = parseFloat(queryParams.get('lat'));
+    const lng = parseFloat(queryParams.get('lng'));
+    
+    // Check if lat and lng are valid numbers
+    if (!isNaN(lat) && !isNaN(lng)) {
+        // Set map view to the coordinates from URL
+        map.setView([lat, lng], 12); // Adjust zoom level (12) as needed
+    } else {
+        console.error('Invalid or missing lat/lng parameters in URL.');
+    }
+}
+
+// Example usage (call this function when your map is ready to be relocated)
+relocateMapFromURL();
+
+
 
 async function fetchCityData() {
 	try {
@@ -184,16 +296,16 @@ function addMarkerToMap(lat, lng, title) {
 		.openPopup();
 }
 
-function selectCity(city) {
-	if (map) {
-		map.setView([city.Lat, city.Lng], 12); // Set view to the selected city's coordinates
-		addMarkerToMap(city.Lat, city.Lng, city.City);
-		document.getElementById("input-box").value = city.City; 
-		document.querySelector(".city-result-box").style.display = "none";
-	} else {
-		console.error('Map object is not initialized.');
-	}
-}
+// function selectCity(city) {
+// 	if (map) {
+// 		map.setView([city.Lat, city.Lng], 12); // Set view to the selected city's coordinates
+// 		addMarkerToMap(city.Lat, city.Lng, city.City);
+// 		document.getElementById("input-box").value = city.City; 
+// 		document.querySelector(".city-result-box").style.display = "none";
+// 	} else {
+// 		console.error('Map object is not initialized.');
+// 	}
+// }
 
 // Number of Days
 async function fetchNumberOfDays() {
@@ -440,7 +552,7 @@ function displayArticleDetails(article, listItem) {
 	}, 100); // Adjust delay as necessary
 
 	// Call addCircleToMap function with map object and article coordinates
-	addCircleToMap(map, article.lat, article.lng);
+	addCircleToMap(map, article.lat, article.lng, article.Title);
 
 	// Severity
 	const severityLabel = document.createElement("p");
@@ -455,14 +567,7 @@ function displayArticleDetails(article, listItem) {
 	listItem.insertAdjacentElement("afterend", detailsContainer);
 }
 
-function addCircleToMap(map, lat, lng) {
-	L.circle([lat, lng], {
-		color: 'red',
-		fillColor: '#f03',
-		fillOpacity: 0.5,
-		radius: 1000 // Adjust the radius as needed
-	}).addTo(map);
-}
+
 
 
 
